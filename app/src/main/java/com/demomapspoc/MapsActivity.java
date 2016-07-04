@@ -16,6 +16,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -75,12 +76,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         switch (v.getId()) {
             case R.id.btn_search:
                 String location = mEtSearch.getText().toString();
+                String defaultLocation = "Bangalore";
                 if (!NetworkManager.isNetworkAvailable(this)) {
                     Toast.makeText(getApplicationContext(), "Please check network connectivity", Toast.LENGTH_SHORT).show();
 
-                }
-
-               else if (location != null && !location.equals("") && NetworkManager.isNetworkAvailable(this)) {
+                } else if (location != null && !location.equals("") && NetworkManager.isNetworkAvailable(this)) {
                     Geocoder geocoder = new Geocoder(this);
                     List<Address> addressesList = null;
                     try {
@@ -88,10 +88,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    Address address = addressesList.get(0);
-                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    mMap.addMarker(new MarkerOptions().position(latLng).title("marker"));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                    if (addressesList == null || addressesList.size() == 0) {
+                        Toast.makeText(getApplicationContext(), "No location found", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Address address = addressesList.get(0);
+                        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                        mMap.addMarker(new MarkerOptions().position(latLng).title("marker").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map)).draggable(true));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                    }
                 } else {
 
                     Toast.makeText(getApplicationContext(), "Please enter location", Toast.LENGTH_SHORT).show();
